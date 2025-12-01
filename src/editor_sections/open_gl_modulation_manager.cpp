@@ -29,6 +29,8 @@
 #define INDICES_PER_METER 6
 #define POINTS_PER_METER 4
 
+using namespace juce::gl;
+
 OpenGLModulationManager::OpenGLModulationManager(
     mopo::output_map modulation_sources,
     std::map<std::string, ModulationButton*> modulation_buttons,

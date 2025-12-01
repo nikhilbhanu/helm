@@ -182,12 +182,18 @@ bool SynthBase::loadFromFile(File patch) {
 }
 
 bool SynthBase::exportToFile() {
-  File active_file = getActiveFile();
-  FileChooser save_box("Export Patch", File(), String("*.") + mopo::PATCH_EXTENSION);
-  if (!save_box.browseForFileToSave(true))
-    return false;
+  auto chooser = std::make_unique<FileChooser>(
+      "Export Patch", File(), String("*.") + mopo::PATCH_EXTENSION);
+  auto flags =
+      FileBrowserComponent::saveMode | FileBrowserComponent::canSelectFiles;
 
-  saveToFile(save_box.getResult());
+  chooser->launchAsync(flags, [this](const FileChooser& fc) {
+    auto result = fc.getResult();
+    if (result != File{}) {
+      saveToFile(result);
+    }
+  });
+
   return true;
 }
 

@@ -99,7 +99,7 @@ void LoadSave::loadControls(SynthBase* synth,
 void LoadSave::loadModulations(SynthBase* synth,
                                const Array<var>* modulations) {
   synth->clearModulations();
-  var* modulation = modulations->begin();
+  const var* modulation = modulations->begin();
 
   for (; modulation != modulations->end(); ++modulation) {
     DynamicObject* mod = modulation->getDynamicObject();
@@ -173,7 +173,7 @@ void LoadSave::varToState(SynthBase* synth,
     }
 
     // Fix modulation routing.
-    var* modulation = modulations->begin();
+    const var* modulation = modulations->begin();
     Array<var> old_modulations;
     Array<DynamicObject*> new_modulations;
     for (; modulation != modulations->end(); ++modulation) {
@@ -280,7 +280,7 @@ void LoadSave::varToState(SynthBase* synth,
     }
 
     // Move modulating saturation to distortion.
-    var* modulation = modulations->begin();
+    const var* modulation = modulations->begin();
     for (; modulation != modulations->end(); ++modulation) {
       DynamicObject* mod = modulation->getDynamicObject();
       String destination = mod->getProperty("destination").toString();
@@ -536,7 +536,7 @@ void LoadSave::loadConfig(MidiManager* midi_manager, mopo::StringLayout* layout)
     MidiManager::midi_map midi_learn_map = midi_manager->getMidiLearnMap();
 
     Array<var>* midi_learn = config_properties["midi_learn"].getArray();
-    var* midi_source = midi_learn->begin();
+    const var* midi_source = midi_learn->begin();
 
     for (; midi_source != midi_learn->end(); ++midi_source) {
       DynamicObject* source_object = midi_source->getDynamicObject();
@@ -544,7 +544,7 @@ void LoadSave::loadConfig(MidiManager* midi_manager, mopo::StringLayout* layout)
 
       if (source_object->hasProperty("destinations")) {
         Array<var>* destinations = source_object->getProperty("destinations").getArray();
-        var* midi_destination = destinations->begin();
+        const var* midi_destination = destinations->begin();
 
         for (; midi_destination != destinations->end(); ++midi_destination) {
           DynamicObject* destination_object = midi_destination->getDynamicObject();
@@ -755,27 +755,40 @@ void LoadSave::exportBank(String bank_name) {
   File bank = banks_dir.getChildFile(bank_name);
   Array<File> patches;
   bank.findChildFiles(patches, File::findFiles, true, String("*.") + mopo::PATCH_EXTENSION);
-  ZipFile::Builder zip_builder;
+  auto zip_builder = std::make_shared<ZipFile::Builder>();
 
   for (File patch : patches)
-    zip_builder.addFile(patch, 2, patch.getRelativePathFrom(banks_dir));
+    zip_builder->addFile(patch, 2, patch.getRelativePathFrom(banks_dir));
 
-  FileChooser save_box("Export Bank As", File::getSpecialLocation(File::userHomeDirectory),
-                       String("*.") + EXPORTED_BANK_EXTENSION);
-  if (save_box.browseForFileToSave(true)) {
-    FileOutputStream out_stream(save_box.getResult().withFileExtension(EXPORTED_BANK_EXTENSION));
-    double *progress = nullptr;
-    zip_builder.writeToStream(out_stream, progress);
-  }
+  auto chooser = std::make_shared<FileChooser>(
+      "Export Bank As", File::getSpecialLocation(File::userHomeDirectory),
+      String("*.") + EXPORTED_BANK_EXTENSION);
+  auto flags =
+      FileBrowserComponent::saveMode | FileBrowserComponent::canSelectFiles;
+
+  chooser->launchAsync(flags, [zip_builder, chooser](const FileChooser& fc) {
+    auto result = fc.getResult();
+    if (result != File{}) {
+      FileOutputStream out_stream(result.withFileExtension(EXPORTED_BANK_EXTENSION));
+      double *progress = nullptr;
+      zip_builder->writeToStream(out_stream, progress);
+    }
+  });
 }
 
 void LoadSave::importBank() {
-  FileChooser open_box("Import Bank", File::getSpecialLocation(File::userHomeDirectory),
-                       String("*.") + EXPORTED_BANK_EXTENSION);
-  if (open_box.browseForFileToOpen()) {
-    ZipFile zip_file(open_box.getResult());
-    zip_file.uncompressTo(getBankDirectory());
-  }
+  auto chooser = std::make_shared<FileChooser>(
+      "Import Bank", File::getSpecialLocation(File::userHomeDirectory),
+      String("*.") + EXPORTED_BANK_EXTENSION);
+  auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles;
+
+  chooser->launchAsync(flags, [chooser](const FileChooser& fc) {
+    auto result = fc.getResult();
+    if (result != File{}) {
+      ZipFile zip_file(result);
+      zip_file.uncompressTo(LoadSave::getBankDirectory());
+    }
+  });
 }
 
 int LoadSave::compareVersionStrings(String a, String b) {

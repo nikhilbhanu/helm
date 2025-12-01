@@ -26,6 +26,8 @@
 #define NOISE_RESOLUTION 6
 #define IMAGE_HEIGHT 256
 
+using namespace juce::gl;
+
 namespace {
   static const float random_values[NOISE_RESOLUTION] = {0.3f, 0.9f, -0.9f, -0.2f, -0.5f, 0.7f };
 } // namespace
@@ -61,8 +63,11 @@ void OpenGLWaveViewer::paintBackground() {
   if (getWidth() <= 0 || getHeight() <= 0)
     return;
 
-  const Desktop::Displays::Display& display = Desktop::getInstance().getDisplays().getMainDisplay();
-  float scale = display.scale;
+  const auto& displays = Desktop::getInstance().getDisplays();
+  float scale = 1.0f;
+  if (auto* display = displays.getDisplayForPoint(getScreenPosition()))
+    scale = display->scale;
+
   background_image_ = Image(Image::ARGB, scale * getWidth(), scale * getHeight(), true);
   Graphics g(background_image_);
   g.addTransform(AffineTransform::scale(scale, scale));

@@ -23,6 +23,8 @@
 
 #define MAX_GAIN 2.0
 
+using namespace juce::gl;
+
 OpenGLPeakMeter::OpenGLPeakMeter(bool left) : left_(left) {
   peak_output_ = nullptr;
   position_vertices_ = new float[8] {

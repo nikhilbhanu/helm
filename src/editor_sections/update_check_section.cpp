@@ -108,8 +108,8 @@ void UpdateCheckSection::mouseUp(const MouseEvent &e) {
 
 void UpdateCheckSection::checkUpdate() {
   static const int TIMEOUT = 200;
-  URL version_url("http://tytel.org/static/dist/helm_version.txt");
-  const ScopedPointer<InputStream> in(version_url.createInputStream(false, nullptr, nullptr,
+  URL version_url("https://tytel.org/static/dist/helm_version.txt");
+  std::unique_ptr<InputStream> in(version_url.createInputStream(false, nullptr, nullptr,
                                                                     "", TIMEOUT));
 
   if (in == nullptr)

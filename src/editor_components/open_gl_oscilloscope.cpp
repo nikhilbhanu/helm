@@ -23,6 +23,8 @@
 #define RESOLUTION 256
 #define GRID_CELL_WIDTH 8
 
+using namespace juce::gl;
+
 OpenGLOscilloscope::OpenGLOscilloscope() : output_memory_(nullptr) {
   line_data_ = new float[2 * RESOLUTION];
   line_indices_ = new int[2 * RESOLUTION];

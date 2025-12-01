@@ -101,8 +101,11 @@ void GraphicalStepSequencer::paint(Graphics& g) {
 void GraphicalStepSequencer::resized() {
   ensureMinSize();
 
-  const Desktop::Displays::Display& display = Desktop::getInstance().getDisplays().getMainDisplay();
-  float scale = display.scale;
+  const auto& displays = Desktop::getInstance().getDisplays();
+  float scale = 1.0f;
+  if (auto* display = displays.getDisplayForPoint(getScreenPosition()))
+    scale = display->scale;
+
   background_ = Image(Image::RGB, scale * getWidth(), scale * getHeight(), true);
   resetBackground();
 }
@@ -177,8 +180,11 @@ void GraphicalStepSequencer::resetBackground() {
     return;
 
   ensureMinSize();
-  const Desktop::Displays::Display& display = Desktop::getInstance().getDisplays().getMainDisplay();
-  float scale = display.scale;
+  const auto& displays = Desktop::getInstance().getDisplays();
+  float scale = 1.0f;
+  if (auto* display = displays.getDisplayForPoint(getScreenPosition()))
+    scale = display->scale;
+
   Graphics g(background_);
   g.addTransform(AffineTransform::scale(scale, scale));
   paintBackground(g);

@@ -61,7 +61,7 @@ void FormantResponse::paint(Graphics& g) {
   g.setColour(Colour(0xff03a9f4));
   g.strokePath(filter_response_path_, stroke);
 
-  g.setFont(Fonts::getInstance()->proportional_regular().withPointHeight(16.0f));
+  g.setFont(Fonts::instance()->proportional_regular().withPointHeight(16.0f));
   g.drawText("MIDI", 0, 0, 100, 20, Justification::left);
   g.drawText(String(midi_), 100, 0, 400, 20, Justification::left);
   g.drawText("Frequency", 0, 20, 100, 20, Justification::left);
@@ -73,8 +73,11 @@ void FormantResponse::paint(Graphics& g) {
 }
 
 void FormantResponse::resized() {
-  const Desktop::Displays::Display& display = Desktop::getInstance().getDisplays().getMainDisplay();
-  float scale = display.scale;
+  const auto& displays = Desktop::getInstance().getDisplays();
+  float scale = 1.0f;
+  if (auto* display = displays.getDisplayForPoint(getScreenPosition()))
+    scale = display->scale;
+
   background_ = Image(Image::ARGB, scale * getWidth(), scale * getHeight(), true);
   Graphics g(background_);
   g.addTransform(AffineTransform::scale(scale, scale));
@@ -148,11 +151,14 @@ void FormantResponse::computeFilterCoefficients() {
   for (int i = 0; i < formant_filter_.num_formants(); ++i) {
     double frequency = mopo::utils::midiNoteToFrequency(cutoff_sliders_[i]->getValue());
     double resonance = mopo::utils::magnitudeToQ(resonance_sliders_[i]->getValue());
-    double decibels = INTERPOLATE(MIN_GAIN_DB, MAX_GAIN_DB, gain_sliders_[i]->getValue());
+    double decibels = mopo::utils::interpolate(
+        static_cast<mopo::mopo_float>(MIN_GAIN_DB),
+        static_cast<mopo::mopo_float>(MAX_GAIN_DB),
+        static_cast<mopo::mopo_float>(gain_sliders_[i]->getValue()));
     double gain = mopo::utils::dbToGain(decibels);
 
-    formant_filter_.getFormant(i)->computeCoefficients(mopo::Filter::kGainedBandPass,
-                                                       frequency, resonance, gain);
+    formant_filter_.getFormant(i)->computeCoefficients(mopo::BiquadFilter::kGainedBandPass,
+      frequency, resonance, gain);
   }
   resetResponsePath();
 }
