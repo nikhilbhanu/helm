@@ -36,7 +36,6 @@ FormantResponse::FormantResponse(int resolution) : midi_(0.0f), frequency_(0.0f)
   resetResponsePath();
 
   setOpaque(true);
-  setBufferedToImage(true);
 }
 
 FormantResponse::~FormantResponse() { }

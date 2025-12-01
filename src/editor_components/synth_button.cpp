@@ -39,8 +39,6 @@ SynthButton::SynthButton(String name) : ToggleButton(name), active_(true),
                                         string_lookup_(nullptr), parent_(nullptr) {
   if (!mopo::Parameters::isParameter(name.toStdString()))
     return;
-
-  setBufferedToImage(true);
 }
 
 void SynthButton::buttonStateChanged() {

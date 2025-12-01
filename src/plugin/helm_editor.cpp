@@ -83,7 +83,7 @@ void HelmEditor::updateFullGui() {
 
 void HelmEditor::checkAnimate() {
   Component* top_level = getTopLevelComponent();
-  bool should_animate = top_level->hasKeyboardFocus(true) && top_level->isShowing();
+  bool should_animate = top_level->isShowing();
   if (was_animating_ != should_animate) {
     gui_->animate(should_animate && LoadSave::shouldAnimateWidgets());
     was_animating_ = should_animate;

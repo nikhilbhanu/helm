@@ -62,7 +62,6 @@ SynthSlider::SynthSlider(String name) : Slider(name), bipolar_(false), flip_colo
   setDoubleClickReturnValue(true, details_.default_value);
   setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
 
-  setBufferedToImage(true);
   setColour(Slider::backgroundColourId, Colour(0xff303030));
   setColour(Slider::textBoxOutlineColourId, Colour(0x00000000));
 }

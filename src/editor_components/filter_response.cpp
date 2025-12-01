@@ -44,7 +44,6 @@ FilterResponse::FilterResponse(int resolution) {
   resetResponsePath();
 
   setOpaque(true);
-  setBufferedToImage(true);
 }
 
 FilterResponse::~FilterResponse() { }
