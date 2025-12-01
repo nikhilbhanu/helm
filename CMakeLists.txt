@@ -149,6 +149,81 @@ juce_generate_juce_header(${PROJECT_NAME})
 # Enable C++23
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
 
+# -----------------------------------------------------------------------------
+# Standalone Application Target
+# -----------------------------------------------------------------------------
+file(GLOB_RECURSE StandaloneSourceFiles
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/common/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/editor_components/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/editor_sections/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/look_and_feel/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/standalone/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/synthesis/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/mopo/src/*.cpp"
+)
+
+file(GLOB_RECURSE StandaloneHeaderFiles
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/common/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/editor_components/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/editor_sections/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/look_and_feel/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/standalone/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/synthesis/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/mopo/src/*.h"
+)
+
+juce_add_gui_app(HelmStandalone
+    COMPANY_NAME "${COMPANY_NAME}"
+    BUNDLE_ID "${BUNDLE_ID}"
+    PRODUCT_NAME "${PRODUCT_NAME}"
+    VERSION "${PROJECT_VERSION}"
+    ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/images/helm_icon_512_2x.png"
+)
+
+target_sources(HelmStandalone PRIVATE ${StandaloneSourceFiles} ${StandaloneHeaderFiles})
+
+target_include_directories(HelmStandalone PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/common
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/editor_components
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/editor_sections
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/look_and_feel
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/standalone
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/synthesis
+    ${CMAKE_CURRENT_SOURCE_DIR}/mopo/src
+)
+
+target_compile_definitions(HelmStandalone PUBLIC
+    JUCE_WEB_BROWSER=0
+    JUCE_USE_CURL=0
+    JUCE_USE_XRANDR=0
+    JUCE_DISPLAY_SPLASH_SCREEN=0
+)
+
+target_link_libraries(HelmStandalone PRIVATE
+    HelmBinaryData
+    concurrentqueue
+    juce::juce_audio_basics
+    juce::juce_audio_devices
+    juce::juce_audio_formats
+    juce::juce_audio_processors
+    juce::juce_audio_utils
+    juce::juce_core
+    juce::juce_data_structures
+    juce::juce_events
+    juce::juce_graphics
+    juce::juce_gui_basics
+    juce::juce_gui_extra
+    juce::juce_opengl
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_lto_flags
+    juce::juce_recommended_warning_flags
+)
+
+juce_generate_juce_header(HelmStandalone)
+
+target_compile_features(HelmStandalone PRIVATE cxx_std_23)
+
 # Copy patches to user presets directory after build
 if(APPLE)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

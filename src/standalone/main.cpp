@@ -96,10 +96,14 @@ class HelmApplication : public JUCEApplication {
 
       void open() {
         File active_file = editor_->getActiveFile();
-        FileChooser open_box("Open Patch", File(),
+        auto open_box = std::make_shared<FileChooser>("Open Patch", File(),
                              String("*.") + mopo::PATCH_EXTENSION);
-        if (open_box.browseForFileToOpen())
-          loadFile(open_box.getResult());
+
+        open_box->launchAsync(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles,
+                              [this, open_box](const FileChooser& fc) {
+                                if (fc.getResult().existsAsFile())
+                                  loadFile(fc.getResult());
+                              });
       }
 
       bool perform(const InvocationInfo& info) override {
