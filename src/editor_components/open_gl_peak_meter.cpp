@@ -119,6 +119,8 @@ void OpenGLPeakMeter::render(OpenGLContext& open_gl_context, bool animate) {
 
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+    open_gl_context.extensions.glDisableVertexAttribArray(position_->attributeID);
+
   open_gl_context.extensions.glBindBuffer(GL_ARRAY_BUFFER, 0);
   open_gl_context.extensions.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   
