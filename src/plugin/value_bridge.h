@@ -30,7 +30,7 @@ class ValueBridge : public AudioProcessorParameter {
     };
 
     ValueBridge(std::string name, mopo::Value* value) :
-        AudioProcessorParameter(), name_(name), value_(value), listener_(nullptr),
+        AudioProcessorParameter(1), name_(name), value_(value), listener_(nullptr),
         source_changed_(false) {
       details_ = mopo::Parameters::getDetails(name);
       span_ = details_.max - details_.min;
