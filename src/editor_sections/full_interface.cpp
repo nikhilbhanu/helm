@@ -37,7 +37,6 @@ FullInterface::FullInterface(mopo::control_map controls, mopo::output_map modula
   animate_ = true;
   open_gl_context.setContinuousRepainting(true);
   open_gl_context.setRenderer(this);
-  open_gl_context.attachTo(*getTopLevelComponent());
   open_gl_context.setOpenGLVersionRequired(OpenGLContext::openGL3_2);
 
   addSubSection(synthesis_interface_ = new SynthesisInterface(controls, keyboard_state));
@@ -250,6 +249,15 @@ void FullInterface::resized() {
   modulation_manager_->setBounds(getBounds());
 
   checkBackground();
+}
+
+void FullInterface::parentHierarchyChanged() {
+  Component::parentHierarchyChanged();
+
+  // Attach OpenGL context once component is added to hierarchy
+  if (getTopLevelComponent() != nullptr && !open_gl_context.isAttached()) {
+    open_gl_context.attachTo(*getTopLevelComponent());
+  }
 }
 
 void FullInterface::setOutputMemory(const float* output_memory) {
